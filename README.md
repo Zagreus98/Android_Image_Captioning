@@ -1,2 +1,2 @@
-# Android_Image_Captioning
+# Mobile App for Image captioning
 #TBD
