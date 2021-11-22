@@ -3,9 +3,6 @@ import torch.nn.functional as F
 import numpy as np
 import json
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import skimage.transform
 import cv2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
