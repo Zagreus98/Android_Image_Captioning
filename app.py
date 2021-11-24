@@ -3,9 +3,26 @@ from werkzeug.utils import secure_filename
 import os
 from tts import TTSVoice
 import json
-# from caption import caption_image
+from caption import caption_image_beam_search
+import torch
 
-
+# Model data
+# ------------------------------------------------------------------
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = 'pretrained_embbedings_BEST_checkpoint_coco_5_cap_per_img_5_min_word_freq.pth.tar'
+word_map = 'WORDMAP_coco_5_cap_per_img_5_min_word_freq.json'
+with open(word_map, 'r') as j:
+    word_map = json.load(j)
+beam_size = 3
+# Load model
+checkpoint = torch.load(model, map_location=str(device))
+decoder = checkpoint['decoder']
+decoder = decoder.to(device)
+decoder.eval()
+encoder = checkpoint['encoder']
+encoder = encoder.to(device)
+encoder.eval()
+# --------------------------------------------------------------------
 UPLOAD_FOLDER = 'uploads'
 TTS_AUDIO = 'tts'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -31,10 +48,9 @@ def upload_image():
 
 @app.route('/process')
 def process_image():
-    image_name_ext = request.args.get('image_name')
+    image_name_ext = request.args.get('image_name') # TBD unde punem imaginea ca sa construiesc path-ul catre ea
     image_name = image_name_ext.split('.')[0]
-    # caption_image
-    caption = "PLACEHOLDER"
+    caption_image_beam_search(encoder, decoder, image_name_ext, word_map, beam_size)
     return redirect(url_for('text2speech', image_name=image_name, caption=caption))
 
 
