@@ -50,7 +50,7 @@ def upload_image():
 def process_image():
     image_name_ext = request.args.get('image_name') # TBD unde punem imaginea ca sa construiesc path-ul catre ea
     image_name = image_name_ext.split('.')[0]
-    caption_image_beam_search(encoder, decoder, image_name_ext, word_map, beam_size)
+    caption = caption_image_beam_search(encoder, decoder, image_name_ext, word_map, beam_size)
     return redirect(url_for('text2speech', image_name=image_name, caption=caption))
 
 
