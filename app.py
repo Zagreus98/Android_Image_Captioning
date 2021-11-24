@@ -5,7 +5,7 @@ from tts import TTSVoice
 import json
 # from caption import caption_image
 
-
+CURRENT_FOLDER = r'C:\Users\Mihai\PycharmProjects\Android_Image_Captioning'
 UPLOAD_FOLDER = 'uploads'
 TTS_AUDIO = 'tts'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -24,6 +24,7 @@ def upload_image():
         filename = secure_filename(uploaded_file.filename)
         if filename != '':
             uploaded_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # uploaded_file.save(os.path.join(CURRENT_FOLDER, filename))
         return redirect(url_for('process_image', image_name=filename))
     else:
         return render_template('upload.html')
@@ -60,17 +61,18 @@ def text2speech():
 def checker(image_name):
     if request.method == 'GET':
         # Test what data comes from android
-        data_img_name = request.get_data()
+        # data_img_name = request.get_data()
+        data_img_name = 'CHANGELOG'
 
-        try:
-            json_file_path = os.path.join(app.config['CWD'], app.config['TTS'], data_img_name + '.json')
-            with open(json_file_path, os.O_RDONLY) as file:
-                json_file = file.read()
-                file.close()
-            return json_file
+        #try:
+        json_file_path = os.path.join(app.config['CWD'], app.config['TTS'], data_img_name + '.json')
+        with open(json_file_path, mode='r') as file:
+            json_file = file.read()
+            file.close()
+        return json_file
 
-        except:
-            return 'not_ready'
+        #except:
+            #return 'not_ready'
 
 
 '''
