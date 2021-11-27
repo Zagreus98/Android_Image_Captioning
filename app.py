@@ -80,7 +80,7 @@ def checker(image_name):
     if request.method == 'GET':
         # Test what data comes from android
         # data_img_name = request.get_data()
-        data_img_name = 'CHANGELOG'
+        data_img_name = image_name
 
         #try:
         json_file_path = os.path.join(app.config['CWD'], app.config['TTS'], data_img_name + '.json')
