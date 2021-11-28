@@ -27,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.loader.content.CursorLoader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,16 +46,10 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class CameraActivity extends Activity {
-    private static final int CAMERA_REQUEST = 1888;
     private ImageView imageView;
     private TextView caption_textview;
-    private static final int MY_CAMERA_PERMISSION_CODE = 100;
-    private File photo_taken;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    String currentPhotoPath;
     private ContentValues values;
     private Uri imageUri;
-    private Uri photoUri;
     private static final int PICTURE_RESULT = 122 ;
     private Bitmap thumbnail;
     private File gallery_image;
@@ -121,13 +114,8 @@ public class CameraActivity extends Activity {
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(intent, PICTURE_RESULT);
 
-                Runnable r = () -> {
-                    captionButton.setVisibility(View.VISIBLE);
-                    playAudio(tts_url);
-                };
+                captionButton.setVisibility(View.VISIBLE);
 
-                Handler h = new Handler();
-                h.postDelayed(r, 1000); // <-- the "1000" is the delay time in miliseconds.
             }
         });
 
@@ -205,6 +193,7 @@ public class CameraActivity extends Activity {
                     filePathColumn, null, null, null);
             cursor.moveToFirst();
 
+
             // THIS WORKS - PREVIEW IMAGE
             // -------------------------
             try {
@@ -218,6 +207,7 @@ public class CameraActivity extends Activity {
             //imageView.setImageBitmap(thumbnail);
 
             cursor.close();
+            cursor = null;
             // ---------------------------
 
             // GET FILE INFO
@@ -240,13 +230,15 @@ public class CameraActivity extends Activity {
             System.out.println(returnCursor.getString(nameIndex));
             System.out.println(returnCursor.getLong(sizeIndex));
             imageView.setImageURI(returnUri);
-
+            String filename = returnCursor.getString(nameIndex);
+            returnCursor.close();
+            returnCursor = null;
 
             // IMAGE FROM BITMAP
             try {
                 //Load bitmap from Uri and create empty file
                 Bitmap gallery_bitmap = getBitmapFromUri(returnUri, getApplicationContext());
-                gallery_image = new File(getApplicationContext().getCacheDir(), returnCursor.getString(nameIndex));
+                gallery_image = new File(getApplicationContext().getCacheDir(), filename);
                 gallery_image.createNewFile();
 
                 //Convert bitmap to byte array
@@ -269,7 +261,7 @@ public class CameraActivity extends Activity {
             try {
                 uploadImage("http://10.0.2.2:5000/upload", gallery_image);
                 //System.out.println(imageUri);
-                JSONObject json_file = getCaption_tts(String.format("http://10.0.2.2:5000/check/%s", returnCursor.getString(nameIndex)), returnCursor.getString(nameIndex));
+                JSONObject json_file = getCaption_tts(String.format("http://10.0.2.2:5000/check/%s", filename), filename);
 
                 caption_text = json_file.getString("caption");
                 tts_url = json_file.getString("audio_url");
@@ -279,36 +271,23 @@ public class CameraActivity extends Activity {
                 e.printStackTrace();
             }
 
-
-           returnCursor.close();
-
-
         }
     }
 
 
     public String getRealPathFromURI(Uri contentUri) {
         String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         //System.out.println("Real Path.");
         //System.out.println(cursor.getString(column_index));
         String r_path = cursor.getString(column_index);
         cursor.close();
+        cursor = null;
         return r_path;
     }
 
-    private String getRealPathFromURI2(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(getApplicationContext(), contentUri, proj, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String result = cursor.getString(column_index);
-        cursor.close();
-        return result;
-    }
 
     private Bitmap getBitmapFromUri(Uri uri, Context context) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =

@@ -13,7 +13,7 @@ model = 'pretrained_embbedings_BEST_checkpoint_coco_5_cap_per_img_5_min_word_fre
 word_map = 'WORDMAP_coco_5_cap_per_img_5_min_word_freq.json'
 with open(word_map, 'r') as j:
     word_map = json.load(j)
-beam_size = 3
+beam_size = 5
 # Load model
 checkpoint = torch.load(model, map_location=str(device))
 decoder = checkpoint['decoder']
