@@ -53,7 +53,10 @@ def upload_image():
 def process_image():
     image_name_ext = request.args.get('image_name') # TBD unde punem imaginea ca sa construiesc path-ul catre ea
     image_name = image_name_ext.split('.')[0]
-    caption = caption_image_beam_search(encoder, decoder, image_name_ext, word_map, beam_size)
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_name_ext)
+    caption = caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size)
+    print(caption)
+    #caption = "This is {}".format(image_name)
     return redirect(url_for('text2speech', image_name=image_name, caption=caption))
 
 
@@ -81,6 +84,7 @@ def checker(image_name):
         # Test what data comes from android
         # data_img_name = request.get_data()
         data_img_name = image_name
+        data_img_name = data_img_name.split('.')[0]
 
         #try:
         json_file_path = os.path.join(app.config['CWD'], app.config['TTS'], data_img_name + '.json')

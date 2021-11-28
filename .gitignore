@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.json
+*.jpg
 # C extensions
 *.so
 *.tar
@@ -14,6 +15,7 @@ develop-eggs/
 dist/
 downloads/
 eggs/
+.idea/
 .eggs/
 lib/
 lib64/

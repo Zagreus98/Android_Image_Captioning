@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Image Caption</string>
+    <string name="open_camera">Open Camera</string>
+    <string name="opens_the_camera">Opens the camera</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="camera">take-picture</string>
+    <string name="request_bb">Request bb</string>
+    <string name="get_request">Get Request</string>
+    <string name="get_caption">Get Caption</string>
+    <string name="get_caption_text">Awaiting caption from server…</string>
+    <string name="play">Play</string>
+    <string name="open_gallery_text">Open Gallery</string>
+</resources>

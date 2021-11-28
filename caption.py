@@ -138,7 +138,7 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
 if __name__ == '__main__':
     # paths for the inputs
-    img = 'aparate.jpg'
+    img = r'C:\Users\Mihai\PycharmProjects\Android_Image_Captioning\uploads\2021-11-28_10-25-51.jpg'
     model = 'pretrained_embbedings_BEST_checkpoint_coco_5_cap_per_img_5_min_word_freq.pth.tar'
     word_map = 'WORDMAP_coco_5_cap_per_img_5_min_word_freq.json'
     beam_size = 3

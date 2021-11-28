@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/image_linear_layout"
+        android:layout_width="402dp"
+        android:layout_height="559dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="1dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.428"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="405dp"
+            android:layout_height="402dp"
+            android:contentDescription="@string/opens_the_camera"
+            android:src="@drawable/icon"
+            tools:ignore="ImageContrastCheck" />
+
+        <TextView
+            android:id="@+id/caption_textview"
+            android:layout_width="361dp"
+            android:layout_height="145dp"
+            android:layout_marginStart="16dp"
+            android:fontFamily="monospace"
+            android:text="@string/get_caption_text"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:typeface="sans"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <!-- app:srcCompat="@android:mipmap/sym_def_app_icon" -->
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/open_camera_button"
+        android:layout_width="138dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="76dp"
+        android:text="@string/open_camera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.205"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_linear_layout"
+        app:layout_constraintVertical_bias="0.56" />
+
+    <Button
+        android:id="@+id/get_caption_tts_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:text="@string/get_caption"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.524"
+        app:layout_constraintStart_toEndOf="@+id/open_camera_button" />
+
+    <Button
+        android:id="@+id/replay_caption_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/play"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.789"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_camera_button"
+        app:layout_constraintVertical_bias="0.428" />
+
+    <Button
+        android:id="@+id/select_from_gallery_button"
+        android:layout_width="136dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="56dp"
+        android:text="@string/open_gallery_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/open_camera_button" />
+</androidx.constraintlayout.widget.ConstraintLayout>
