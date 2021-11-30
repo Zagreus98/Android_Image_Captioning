@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.Nullable;
 
+import com.android.volley.toolbox.HttpResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,5 +58,30 @@ public class ManageRequests {
         JSONObject jObject = new JSONObject(jsonData);
         return jObject;
 
+    }
+
+    public String check_server_status(String url) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        Response responses = null;
+        int response_code;
+        try {
+            responses = client.newCall(request).execute();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        response_code = responses.code();
+        if (response_code == 200){
+            return "The server is online!";
+        }
+        if (response_code == 404) {
+            return "The server is offline!";
+        }
+        else {
+            return "The server is not working as intended!";
+        }
     }
 }

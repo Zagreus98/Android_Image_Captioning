@@ -2,10 +2,10 @@ package com.example.imagecaption;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,9 +14,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.FileUtils;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -36,13 +33,11 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Date;
 
 public class CameraActivity extends Activity {
@@ -53,27 +48,39 @@ public class CameraActivity extends Activity {
     private static final int PICTURE_RESULT = 122 ;
     private Bitmap thumbnail;
     private File gallery_image;
-    private FileInputStream gallery_image_stream;
+    private TextView server_status;
+    private ImageView server_status_code;
+    static String url = "http://";
     String imageurl;
     String image_name;
     String caption_text;
     String tts_url;
     MediaPlayer mediaPlayer;
     InputStream inputStream;
-    InputStreamToFile inputStreamToFile;
     BufferedInputStream bufferedInputStream;
     public static final int PICK_IMAGE = 2;
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int UPLOAD = 4 ;
+    private static final int CAPTION = 5 ;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+        // Get the URL inserted in MainActivity
+        SharedPreferences sharedPrefGet = this.getSharedPreferences("server_url", MODE_PRIVATE);
+        url = url + sharedPrefGet.getString("url", null);
+
+
+        check_status(url);
+
         this.imageView = (ImageView) this.findViewById(R.id.image_preview);
         this.caption_textview = (TextView) this.findViewById(R.id.caption_textview);
         Button photoButton = (Button) this.findViewById(R.id.open_camera_button);
-        Button captionButton = (Button) this.findViewById(R.id.replay_caption_button);
+        Button audioButton = (Button) this.findViewById(R.id.replay_caption_button);
+        Button captionButton = (Button) this.findViewById(R.id.get_caption_tts_button);
         Button galleryButton = (Button) this.findViewById(R.id.select_from_gallery_button);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -101,29 +108,36 @@ public class CameraActivity extends Activity {
                 values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
                 values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
 
-//                System.out.println("Values");
-//                System.out.println(values);
-
+                // Create the URI for the image that will be taken
                 imageUri = getContentResolver().insert(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-//                System.out.println(imageUri);
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-//                System.out.println("URI");
-//                System.out.println(imageUri);
+                // Where to store and launch camera app
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(intent, PICTURE_RESULT);
 
-                captionButton.setVisibility(View.VISIBLE);
+                // Make Caption Button visible
+                audioButton.setVisibility(View.VISIBLE);
 
+            }
+        });
+
+        audioButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Plays the TTS
+                System.out.println(tts_url);
+                playAudio(tts_url);
             }
         });
 
         captionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println(tts_url);
-                playAudio(tts_url);
+                // Plays the TTS
+                //uploadAction();
+                Toast.makeText(CameraActivity.this, "Not implemented yet!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -134,59 +148,56 @@ public class CameraActivity extends Activity {
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
-                captionButton.setVisibility(View.VISIBLE);
+                audioButton.setVisibility(View.VISIBLE);
             }
         });
-
-
 
     }
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Case for taking a picture with the camera
         if (requestCode == PICTURE_RESULT) {
 
             try {
+                // Thumbnail that will be shown in the layout
                 thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
                 imageView.setImageBitmap(thumbnail);
+                // Get the URL from URI
                 imageurl = getRealPathFromURI(imageUri);
-                //@SuppressLint("SimpleDateFormat") String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
                 // Load file from path
                 File image_file = new File(imageurl);
 
-//                System.out.println("Path");
-//                System.out.println(imageurl);
-//                System.out.println(imageUri);
-
+                // Prepare image to be uploaded
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(image_file));
                 thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, os);
 
+                // Upload image
+                uploadAction(url, image_name, image_file, UPLOAD);
 
-                uploadImage("http://10.0.2.2:5000/upload", image_file);
-                JSONObject json_file = getCaption_tts(String.format("http://10.0.2.2:5000/check/%s", image_name), image_name);
-                caption_text = json_file.getString("caption");
-                tts_url = json_file.getString("audio_url");
-
-
+                // Pause thread or introduce sleep time
                 caption_textview.setText(caption_text);
                 //playAudio(tts_url);
 
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(this, "Flask server is not working!", Toast.LENGTH_SHORT).show();
                 System.out.println("Flask server is not working!");
             }
         }
 
+        // Case for picking an image from the gallery
         if (requestCode == PICK_IMAGE) {
             if (data == null) {
                 //Display an error
                 System.out.println("Null");
                 return;
             }
+            // Grabs the URI
             Uri selectedImage = data.getData();
-            System.out.println(selectedImage);
+//            System.out.println(selectedImage);
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
             Cursor cursor = getContentResolver().query(selectedImage,
@@ -222,23 +233,19 @@ public class CameraActivity extends Activity {
             int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
             int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
 
-
-            // Some useful prints
-            //System.out.println(returnCursor.getString(pathIndex));
-            System.out.println("Some file info");
-            //System.out.println(returnCursor.getString(pathIndex));
-            System.out.println(returnCursor.getString(nameIndex));
-            System.out.println(returnCursor.getLong(sizeIndex));
+            // Preview the image
             imageView.setImageURI(returnUri);
-            String filename = returnCursor.getString(nameIndex);
+            String gallery_image_filename = returnCursor.getString(nameIndex);
             returnCursor.close();
+
+            // To make sure that the cursor clears itself
             returnCursor = null;
 
             // IMAGE FROM BITMAP
             try {
                 //Load bitmap from Uri and create empty file
                 Bitmap gallery_bitmap = getBitmapFromUri(returnUri, getApplicationContext());
-                gallery_image = new File(getApplicationContext().getCacheDir(), filename);
+                gallery_image = new File(getApplicationContext().getCacheDir(), gallery_image_filename);
                 gallery_image.createNewFile();
 
                 //Convert bitmap to byte array
@@ -259,16 +266,14 @@ public class CameraActivity extends Activity {
             System.out.println("Image file");
 
             try {
-                uploadImage("http://10.0.2.2:5000/upload", gallery_image);
-                //System.out.println(imageUri);
-                JSONObject json_file = getCaption_tts(String.format("http://10.0.2.2:5000/check/%s", filename), filename);
 
-                caption_text = json_file.getString("caption");
-                tts_url = json_file.getString("audio_url");
+                uploadAction(url, gallery_image_filename, gallery_image, UPLOAD);
                 caption_textview.setText(caption_text);
 
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
+                Toast.makeText(this, "Flask server is not working!", Toast.LENGTH_SHORT).show();
+                System.out.println("Flask server is not working!");
             }
 
         }
@@ -276,12 +281,13 @@ public class CameraActivity extends Activity {
 
 
     public String getRealPathFromURI(Uri contentUri) {
+        // Open URI with cursor
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
-        //System.out.println("Real Path.");
-        //System.out.println(cursor.getString(column_index));
+
+        // Retrieve absolute path
         String r_path = cursor.getString(column_index);
         cursor.close();
         cursor = null;
@@ -298,15 +304,57 @@ public class CameraActivity extends Activity {
         return image;
     }
 
+    // Initialize the function from ManageRequests class
     private void uploadImage(String url, File image) throws IOException {
         ManageRequests upload_File = new ManageRequests();
         upload_File.upload(url, image);
     }
 
+    // Function that uploads the file and returns the caption and TTS url
+    private void uploadAction(String url, String filename, File image, int Action_code) throws IOException, JSONException {
+        if (Action_code == UPLOAD) {
+            // Uploads the image to the server
+            uploadImage(url + "/upload", image);
+
+            // Retrieves the JSON object
+            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+
+            // Changes the variables with the retrieved strings
+            caption_text = json_file.getString("caption");
+            tts_url = json_file.getString("audio_url");
+        }
+        if (Action_code == CAPTION) {
+            // Retrieves the JSON object
+            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+
+            // Changes the variables with the retrieved strings
+            caption_text = json_file.getString("caption");
+            tts_url = json_file.getString("audio_url");
+        }
+    }
+
+    // Initialize the function from ManageRequests class that returns the JSON object with the caption and TTS
     private JSONObject getCaption_tts(String url, String image_name) throws IOException, JSONException {
         ManageRequests json_file = new ManageRequests();
-        //json_file.get_json(url, image_name);
         return json_file.get_json(url, image_name);
+    }
+
+    // Checks Server Status
+    private void check_status(String url) {
+        ManageRequests url_status = new ManageRequests();
+        String status = url_status.check_server_status(url);
+
+        if (status.equals("The server is online!")){
+            server_status.setText(status);
+            int id = getResources().getIdentifier("com.example.imagecaption:drawable/" + "green_dot", null, null);
+            server_status_code.setImageResource(id);
+
+        }
+        else {
+            server_status.setText(status);
+            int id = getResources().getIdentifier("com.example.imagecaption:drawable/" + "red_dot", null, null);
+            server_status_code.setImageResource(id);
+        }
     }
 
     private void playAudio(String audioUrl) {

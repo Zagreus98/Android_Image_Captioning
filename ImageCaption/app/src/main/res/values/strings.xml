@@ -4,10 +4,17 @@
     <string name="opens_the_camera">Opens the camera</string>
     <string name="take_picture">Take Picture</string>
     <string name="camera">take-picture</string>
+    <string name="to_application_text">Connect</string>
     <string name="request_bb">Request bb</string>
     <string name="get_request">Get Request</string>
     <string name="get_caption">Get Caption</string>
     <string name="get_caption_text">Awaiting caption from server…</string>
     <string name="play">Play</string>
     <string name="open_gallery_text">Open Gallery</string>
+    <string name="server_url_text">Server URL</string>
+    <string name="server_url_textview_text">Insert the IP of the server</string>
+    <string name="server_url">Server URL</string>
+    <string name="preference_file_key">server_details</string>
+    <string name="server_status_text">Server status...</string>
+    <string name="server_status_description">Server status image</string>
 </resources>

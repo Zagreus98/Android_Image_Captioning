@@ -6,45 +6,49 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
-        android:id="@+id/take_picture_button"
+        android:id="@+id/to_application_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/camera"
+        android:text="@string/to_application_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.612" />
+        app:layout_constraintVertical_bias="0.612"
+        tools:ignore="DuplicateSpeakableTextCheck" />
+
+    <EditText
+        android:id="@+id/edit_server_url_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:labelFor="@id/to_application_button"
+        android:minHeight="48dp"
+        android:text="@string/server_url"
+        app:layout_constraintBottom_toTopOf="@+id/to_application_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.919"
+        tools:ignore="TextFields"
+        android:autofillHints="server_url" />
 
     <TextView
-        android:id="@+id/request_get_textview"
+        android:id="@+id/server_url_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="94dp"
-        android:layout_marginTop="98dp"
-        android:text="@string/request_bb"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/get_req_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="89dp"
-        android:layout_marginEnd="46dp"
-        android:text="@string/get_request"
+        android:fontFamily="sans-serif-condensed"
+        android:text="@string/server_url_textview_text"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/edit_server_url_input"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.391"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.943" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
