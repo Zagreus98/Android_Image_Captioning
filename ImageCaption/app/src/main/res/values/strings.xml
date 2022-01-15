@@ -13,7 +13,7 @@
     <string name="open_gallery_text">Open Gallery</string>
     <string name="server_url_text">Server URL</string>
     <string name="server_url_textview_text">Insert the IP of the server</string>
-    <string name="server_url">Server URL</string>
+    <string name="server_url">10.0.2.56</string>
     <string name="preference_file_key">server_details</string>
     <string name="server_status_text">Server status...</string>
     <string name="server_status_description">Server status image</string>

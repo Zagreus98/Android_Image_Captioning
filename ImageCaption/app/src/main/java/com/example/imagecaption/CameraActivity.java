@@ -74,7 +74,7 @@ public class CameraActivity extends Activity {
         url = url + sharedPrefGet.getString("url", null);
 
 
-        check_status(url);
+        //check_status(url);
 
         this.imageView = (ImageView) this.findViewById(R.id.image_preview);
         this.caption_textview = (TextView) this.findViewById(R.id.caption_textview);

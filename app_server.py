@@ -5,10 +5,6 @@ from tts import TTSVoice
 import json
 from caption import caption_image_beam_search
 import torch
-# from twisted.internet import reactor
-import twisted.internet.reactor as reactor
-from twisted.web.server import Site
-from twisted.web.wsgi import WSGIResource
 
 # Model data
 # ------------------------------------------------------------------
@@ -108,4 +104,4 @@ def checker(image_name):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
