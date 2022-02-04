@@ -4,38 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_app"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/image_logo"
+        android:layout_width="189dp"
+        android:layout_height="139dp"
+        android:layout_marginStart="88dp"
+        android:layout_marginTop="80dp"
+        android:src="@drawable/logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ImageContrastCheck,MissingConstraints" />
 
     <Button
         android:id="@+id/to_application_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/round_button"
         android:text="@string/to_application_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.437"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.612"
+        app:layout_constraintVertical_bias="0.62"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
         android:id="@+id/edit_server_url_input"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:autofillHints="server_url"
         android:ems="10"
         android:inputType="text"
         android:labelFor="@id/to_application_button"
-        android:minHeight="48dp"
+        android:minHeight="50dp"
         android:text="@string/server_url"
         app:layout_constraintBottom_toTopOf="@+id/to_application_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.452"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.919"
-        tools:ignore="TextFields"
-        android:autofillHints="server_url" />
+        app:layout_constraintVertical_bias="0.898"
+        tools:ignore="TextFields" />
 
     <TextView
         android:id="@+id/server_url_textview"
@@ -43,7 +56,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
         android:text="@string/server_url_textview_text"
-        android:textSize="14sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/edit_server_url_input"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.391"
