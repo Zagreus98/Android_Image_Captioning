@@ -4,7 +4,8 @@
     <string name="opens_the_camera">Opens the camera</string>
     <string name="take_picture">Take Picture</string>
     <string name="camera">take-picture</string>
-    <string name="to_application_text">Connect</string>
+    <string name="to_application_text">Connect Manually</string>
+    <string name="to_application_text_auto">Auto Connect</string>
     <string name="request_bb">Request bb</string>
     <string name="get_request">Get Request</string>
     <string name="get_caption">Get Caption</string>

@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Button that goes to the application
         Button Application_button = (Button) findViewById(R.id.to_application_button);
+        Button Application_button_auto = (Button) findViewById(R.id.to_application_button2);
         Application_button.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -48,6 +49,20 @@ public class MainActivity extends AppCompatActivity {
 
                 //editor.putString("url", getString(R.string.server_url));
                 editor.putString("url", String.valueOf(edit_url.getText()));
+                editor.apply();
+                Intent i = new Intent(getApplicationContext(), CameraActivity.class);
+                startActivity(i);
+            }
+        });
+
+        Application_button_auto.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
+                //editor.putString("url", getString(R.string.server_url));
+                editor.putString("url", "androidcaption.ddns.net:85");
                 editor.apply();
                 Intent i = new Intent(getApplicationContext(), CameraActivity.class);
                 startActivity(i);

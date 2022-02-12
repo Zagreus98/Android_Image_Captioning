@@ -62,6 +62,7 @@ public class ManageRequests {
 
     public String check_server_status(String url) {
         OkHttpClient client = new OkHttpClient();
+
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -73,7 +74,13 @@ public class ManageRequests {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        response_code = responses.code();
+
+        try {
+            response_code = responses.code();
+        } catch (Exception e) {
+            return "The server is offline!";
+        }
+
         if (response_code == 200){
             return "The server is online!";
         }

@@ -10,10 +10,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -61,7 +63,13 @@ public class CameraActivity extends Activity {
     public static final int PICK_IMAGE = 2;
     private static final int UPLOAD = 4 ;
     private static final int CAPTION = 5 ;
+    Handler handler = new Handler();
+    Runnable runnable;
+    int delay = 1000;
+    int tts_played = 0;
 
+    public CameraActivity() {
+    }
 
 
     @Override
@@ -78,6 +86,8 @@ public class CameraActivity extends Activity {
 
         this.imageView = (ImageView) this.findViewById(R.id.image_preview);
         this.caption_textview = (TextView) this.findViewById(R.id.caption_textview);
+        this.server_status_code = (ImageView) this.findViewById(R.id.server_status_image);
+        this.server_status = (TextView) this.findViewById(R.id.server_status_textview);
         Button photoButton = (Button) this.findViewById(R.id.open_camera_button);
         Button audioButton = (Button) this.findViewById(R.id.replay_caption_button);
         Button captionButton = (Button) this.findViewById(R.id.get_caption_tts_button);
@@ -93,7 +103,8 @@ public class CameraActivity extends Activity {
 
                 @SuppressLint("SimpleDateFormat") String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
                 //System.out.println("Values");
-
+                tts_url = "";
+                caption_text = "Awaiting caption from server…";
                 values = new ContentValues();
                 values.put(MediaStore.Images.Media.TITLE, timeStamp);
 
@@ -123,12 +134,14 @@ public class CameraActivity extends Activity {
             }
         });
 
+
         audioButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Plays the TTS
                 System.out.println(tts_url);
                 playAudio(tts_url);
+
             }
         });
 
@@ -144,6 +157,8 @@ public class CameraActivity extends Activity {
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                tts_url = "";
+                caption_text = "Awaiting caption from server…";
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -154,12 +169,42 @@ public class CameraActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        handler.postDelayed(runnable = new Runnable() {
+            @Override
+            public void run() {
+                handler.postDelayed(runnable, delay);
+                caption_textview.setText(caption_text);
+                String s1 = "Awaiting caption from server…";
+                String s2 = "";
+                check_status(url);
+                try {
+                    if (!caption_text.equals(s1) && tts_played == 0 && !tts_url.equals(s2)) {
+                        playAudio(tts_url);
+                        tts_played = 1;
+                }
+
+                } catch (Exception e) {
+                    caption_text = s1;
+                    System.out.println("Not ready!");
+                }
+            }
+        }, delay);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(runnable); //stop handler when activity not visible super.onPause();
+    }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Case for taking a picture with the camera
         if (requestCode == PICTURE_RESULT) {
-
+            tts_played = 0;
             try {
                 // Thumbnail that will be shown in the layout
                 thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
@@ -175,10 +220,11 @@ public class CameraActivity extends Activity {
                 thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, os);
 
                 // Upload image
-                uploadAction(url, image_name, image_file, UPLOAD);
+                new uploadTask(url, image_name, image_file, UPLOAD).execute();
+                //uploadAction(url, image_name, image_file, UPLOAD);
 
                 // Pause thread or introduce sleep time
-                caption_textview.setText(caption_text);
+                //caption_textview.setText(caption_text);
                 //playAudio(tts_url);
 
             } catch (Exception e) {
@@ -190,6 +236,7 @@ public class CameraActivity extends Activity {
 
         // Case for picking an image from the gallery
         if (requestCode == PICK_IMAGE) {
+            tts_played = 0;
             if (data == null) {
                 //Display an error
                 System.out.println("Null");
@@ -223,8 +270,8 @@ public class CameraActivity extends Activity {
 
             // GET FILE INFO
             Uri returnUri = data.getData();
-                String mimeType = getContentResolver().getType(returnUri);
-                System.out.println(mimeType);
+            String mimeType = getContentResolver().getType(returnUri);
+            System.out.println(mimeType);
             Cursor returnCursor =
                     getContentResolver().query(returnUri, null, null, null, null);
 
@@ -265,16 +312,10 @@ public class CameraActivity extends Activity {
 
             System.out.println("Image file");
 
-            try {
+            new uploadTask(url, gallery_image_filename, gallery_image, UPLOAD).execute();
+            //uploadAction(url, gallery_image_filename, gallery_image, UPLOAD);
 
-                uploadAction(url, gallery_image_filename, gallery_image, UPLOAD);
-                caption_textview.setText(caption_text);
-
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Flask server is not working!", Toast.LENGTH_SHORT).show();
-                System.out.println("Flask server is not working!");
-            }
+            //caption_textview.setText(caption_text);
 
         }
     }
@@ -311,27 +352,119 @@ public class CameraActivity extends Activity {
     }
 
     // Function that uploads the file and returns the caption and TTS url
-    private void uploadAction(String url, String filename, File image, int Action_code) throws IOException, JSONException {
-        if (Action_code == UPLOAD) {
-            // Uploads the image to the server
-            uploadImage(url + "/upload", image);
+    // AsyncTask upload
+    private class uploadTask extends AsyncTask<Void, Void, Void> {
+        String url;
+        String filename;
+        File image;
+        int Action_code;
 
-            // Retrieves the JSON object
-            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
-
-            // Changes the variables with the retrieved strings
-            caption_text = json_file.getString("caption");
-            tts_url = json_file.getString("audio_url");
+        public uploadTask(String url, String filename, File image, int Action_code) {
+            this.url = url;
+            this.filename = filename;
+            this.image = image;
+            this.Action_code = Action_code;
         }
-        if (Action_code == CAPTION) {
-            // Retrieves the JSON object
-            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
 
-            // Changes the variables with the retrieved strings
-            caption_text = json_file.getString("caption");
-            tts_url = json_file.getString("audio_url");
+        @Override
+        protected Void doInBackground(Void...params) {
+            if (Action_code == UPLOAD) {
+                // Uploads the image to the server
+                //check_status(url);
+                try {
+                    uploadImage(url + "/upload", image);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                // Retrieves the JSON object
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                JSONObject json_file = null;
+                try {
+                    json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                // Changes the variables with the retrieved strings
+                String s1 = "Awaiting caption from server…";
+                try {
+                    assert json_file != null;
+                    caption_text = json_file.getString("caption");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    tts_url = json_file.getString("audio_url");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (Action_code == CAPTION) {
+                // Retrieves the JSON object
+                JSONObject json_file = null;
+                try {
+                    json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                // Changes the variables with the retrieved strings
+                try {
+                    caption_text = json_file.getString("caption");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    tts_url = json_file.getString("audio_url");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
         }
     }
+//    private void uploadAction(String url, String filename, File image, int Action_code) throws IOException, JSONException {
+//        if (Action_code == UPLOAD) {
+//            // Uploads the image to the server
+//            //check_status(url);
+//            uploadImage(url + "/upload", image);
+//
+//
+//            // Retrieves the JSON object
+//            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+//
+//            // Changes the variables with the retrieved strings
+//            caption_text = json_file.getString("caption");
+//            tts_url = json_file.getString("audio_url");
+//        }
+//        if (Action_code == CAPTION) {
+//            // Retrieves the JSON object
+//            JSONObject json_file = getCaption_tts(String.format(url + "/check/%s", filename), filename);
+//
+//            // Changes the variables with the retrieved strings
+//            caption_text = json_file.getString("caption");
+//            tts_url = json_file.getString("audio_url");
+//        }
+//    }
 
     // Initialize the function from ManageRequests class that returns the JSON object with the caption and TTS
     private JSONObject getCaption_tts(String url, String image_name) throws IOException, JSONException {
@@ -340,18 +473,21 @@ public class CameraActivity extends Activity {
     }
 
     // Checks Server Status
+    @SuppressLint("SetTextI18n")
     private void check_status(String url) {
         ManageRequests url_status = new ManageRequests();
         String status = url_status.check_server_status(url);
 
         if (status.equals("The server is online!")){
-            server_status.setText(status);
+            //Toast.makeText(this, "The server is online!", Toast.LENGTH_SHORT).show();
+            server_status.setText("Online!");
             int id = getResources().getIdentifier("com.example.imagecaption:drawable/" + "green_dot", null, null);
             server_status_code.setImageResource(id);
 
         }
         else {
-            server_status.setText(status);
+            //Toast.makeText(this, "The server is offline!", Toast.LENGTH_SHORT).show();
+            server_status.setText("Offline!");
             int id = getResources().getIdentifier("com.example.imagecaption:drawable/" + "red_dot", null, null);
             server_status_code.setImageResource(id);
         }
@@ -360,13 +496,20 @@ public class CameraActivity extends Activity {
     private void playAudio(String audioUrl) {
 
         String audioUrl2 = "https://polly.streamlabs.com/v1/speech?OutputFormat=mp3&Text=THIS%20IS%20NEW%21&VoiceId=Brian&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIHKNQTJ7BGLEFVZA%2F20211127%2Fus-west-2%2Fpolly%2Faws4_request&X-Amz-Date=20211127T142807Z&X-Amz-SignedHeaders=host&X-Amz-Expires=900&X-Amz-Signature=46ea705eef5dacbde430198de1af98cfde8c21a37f122e0c7c59c17c62914e30";
+        String audioUrl3 = "https://samplelib.com/lib/preview/mp3/sample-3s.mp3";
 
         // initializing media player
         mediaPlayer = new MediaPlayer();
 
         // below line is use to set the audio
         // stream type for our media player.
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        //mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setAudioAttributes(
+                new AudioAttributes
+                        .Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+        );
 
         // below line is use to set our
         // url to our media player.

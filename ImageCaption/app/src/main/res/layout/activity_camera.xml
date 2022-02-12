@@ -51,8 +51,8 @@
         android:layout_height="55dp"
         android:layout_marginTop="23dp"
         android:background="@drawable/round_button"
-        android:textColor="@color/white"
         android:text="@string/open_camera"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.235"
@@ -77,15 +77,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/round_button"
-        android:textColor="@color/white"
         android:text="@string/play"
+        android:textColor="@color/white"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.792"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/open_camera_button"
-        app:layout_constraintVertical_bias="0.771" />
+        app:layout_constraintVertical_bias="0.757" />
 
     <Button
         android:id="@+id/select_from_gallery_button"
@@ -93,8 +93,8 @@
         android:layout_height="55dp"
         android:layout_marginTop="23dp"
         android:background="@drawable/round_button"
-        android:textColor="@color/white"
         android:text="@string/open_gallery_text"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.542"
@@ -106,26 +106,24 @@
         android:id="@+id/server_status_image"
         android:layout_width="40dp"
         android:layout_height="25dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="67dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="72dp"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/server_status_description"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/open_camera_button"
-        app:layout_constraintVertical_bias="0.333"
         app:srcCompat="@drawable/red_dot" />
 
     <TextView
         android:id="@+id/server_status_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="59dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="72dp"
         android:layout_marginBottom="16dp"
         android:text="@string/server_status_text"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.082"
         app:layout_constraintStart_toEndOf="@+id/server_status_image"
         app:layout_constraintTop_toBottomOf="@+id/open_camera_button" />
 
@@ -134,6 +132,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.02872777" />
+        app:layout_constraintGuide_percent="0.02" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,13 +7,27 @@
     android:background="@color/background_app"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/to_application_button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/round_button"
+        android:text="@string/to_application_text_auto"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/to_application_button"
+        app:layout_constraintVertical_bias="0.112"
+        tools:ignore="DuplicateSpeakableTextCheck" />
+
     <ImageView
         android:id="@+id/image_logo"
         android:layout_width="189dp"
         android:layout_height="139dp"
-        android:layout_marginStart="88dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="76dp"
         android:src="@drawable/logo"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ImageContrastCheck,MissingConstraints" />
@@ -26,10 +40,10 @@
         android:text="@string/to_application_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.437"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.62"
+        app:layout_constraintVertical_bias="0.578"
         tools:ignore="DuplicateSpeakableTextCheck" />
 
     <EditText
@@ -44,7 +58,7 @@
         android:text="@string/server_url"
         app:layout_constraintBottom_toTopOf="@+id/to_application_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.452"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.898"
@@ -59,9 +73,9 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/edit_server_url_input"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.391"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.943" />
+        app:layout_constraintVertical_bias="0.948" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
